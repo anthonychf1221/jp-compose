@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Jetpack Compose</string>
+
+    <string name="full_name_label">Full name</string>
+    <string name="document_ID_label">Document ID</string>
+    <string name="email_label">E-mail</string>
+    <string name="company_label">Company</string>
+    <string name="save_label">Save</string>
+
 </resources>

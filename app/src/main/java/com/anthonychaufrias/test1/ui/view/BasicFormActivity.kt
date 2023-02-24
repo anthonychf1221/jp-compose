@@ -1,4 +1,4 @@
-package com.anthonychaufrias.test1
+package com.anthonychaufrias.test1.ui.view
 
 import android.os.Bundle
 import android.widget.Toast
@@ -315,3 +315,4 @@ fun TextFieldFor(label: String, marginTop: Dp,
             .fillMaxWidth()
     )
 }
+// https://www.youtube.com/watch?v=G4YopUFICrI&list=PLrn69hTK5FBwu7VmWBg76v23atiMqz_pY&index=10

@@ -1,4 +1,4 @@
-package com.anthonychaufrias.test1
+package com.anthonychaufrias.test1.ui.viewmodel
 
 import android.util.Log
 import android.util.Patterns
