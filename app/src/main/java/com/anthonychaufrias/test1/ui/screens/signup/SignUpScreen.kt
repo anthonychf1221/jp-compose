@@ -2,20 +2,20 @@ package com.anthonychaufrias.test1.ui.screens.signup
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.anthonychaufrias.test1.R
 import com.anthonychaufrias.test1.ui.theme.Purple200
 import com.anthonychaufrias.test1.ui.theme.Purple500
@@ -62,6 +62,11 @@ fun SingUpForm(viewModel: SignUpViewModel){
             onValueChanged = { viewModel.onCompanyChanged(it) }
         )
 
+        Dropdown(
+            label = stringResource(R.string.country_label),
+            marginTop = margin
+        )
+
         PrimaryButton(
             label = stringResource(R.string.save_label),
             marginTop = margin,
@@ -69,6 +74,59 @@ fun SingUpForm(viewModel: SignUpViewModel){
             onSaveClick = { viewModel.onSignUp() }
         )
 
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun Dropdown(label: String, marginTop: Dp) {
+    val contextForToast = LocalContext.current.applicationContext
+    val listItems = arrayOf("Favorites", "Options", "Settings", "Share")
+
+    var selectedItem by remember {
+        mutableStateOf(listItems[0])
+    }
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        TextField(
+            value = selectedItem,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top =  marginTop),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(text = label) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                )
+            },
+            colors = ExposedDropdownMenuDefaults.textFieldColors()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            listItems.forEach { selectedOption ->
+                // menu item
+                DropdownMenuItem(onClick = {
+                    selectedItem = selectedOption
+                    //Toast.makeText(contextForToast, selectedOption, Toast.LENGTH_SHORT).show()
+                    expanded = false
+                }) {
+                    Text(text = selectedOption)
+                }
+            }
+        }
     }
 }
 

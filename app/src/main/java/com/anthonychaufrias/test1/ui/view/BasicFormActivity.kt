@@ -108,7 +108,7 @@ fun OutField(){
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Dropdown() {
-    /*val contextForToast = LocalContext.current.applicationContext
+    val contextForToast = LocalContext.current.applicationContext
     val listItems = arrayOf("Favorites", "Options", "Settings", "Share")
 
     var selectedItem by remember {
@@ -118,7 +118,10 @@ fun Dropdown() {
         mutableStateOf(false)
     }
 
-    // the box
+    // Para llamar a este composable es necesario actualizar las versiones de kotlin y compose
+    // kotlin_version = '1.7.0'
+    // compose_version = '1.1.0'
+    // id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = {
@@ -157,7 +160,7 @@ fun Dropdown() {
                 }
             }
         }
-    }*/
+    }
 }
 
 // https://www.youtube.com/watch?v=Iu074iSpkdE

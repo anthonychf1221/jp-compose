@@ -5,6 +5,7 @@
     <string name="document_ID_label">Document ID</string>
     <string name="email_label">E-mail</string>
     <string name="company_label">Company</string>
+    <string name="country_label">Country</string>
     <string name="save_label">Save</string>
 
 </resources>
