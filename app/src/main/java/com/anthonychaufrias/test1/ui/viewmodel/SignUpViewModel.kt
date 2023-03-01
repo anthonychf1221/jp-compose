@@ -5,8 +5,12 @@ import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.anthonychaufrias.test1.data.CountryRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class SignUpViewModel: ViewModel() {
+@HiltViewModel
+class SignUpViewModel @Inject constructor() : ViewModel(){
     private val _fullName = MutableLiveData<String>()
     val fullName: LiveData<String> = _fullName
 

@@ -17,18 +17,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import com.anthonychaufrias.test1.R
+import com.anthonychaufrias.test1.data.model.CountryModel
 import com.anthonychaufrias.test1.ui.theme.Purple200
 import com.anthonychaufrias.test1.ui.theme.Purple500
+import com.anthonychaufrias.test1.ui.viewmodel.CountryViewModel
 import com.anthonychaufrias.test1.ui.viewmodel.SignUpViewModel
 
 @Composable
-fun SingUpForm(viewModel: SignUpViewModel){
+fun SingUpForm (
+     signUpViewModel: SignUpViewModel,
+     countryViewModel: CountryViewModel
+){
     val margin = dimensionResource(R.dimen.body_margin)
-    val fullName: String by viewModel.fullName.observeAsState(initial = "")
-    val documentID: String by viewModel.documentID.observeAsState(initial = "")
-    val email: String by viewModel.email.observeAsState(initial = "")
-    val company: String by viewModel.company.observeAsState(initial = "")
-    val isButtonEnabled: Boolean by viewModel.isButtonEnabled.observeAsState(initial = false)
+    val fullName: String by signUpViewModel.fullName.observeAsState(initial = "")
+    val documentID: String by signUpViewModel.documentID.observeAsState(initial = "")
+    val email: String by signUpViewModel.email.observeAsState(initial = "")
+    val company: String by signUpViewModel.company.observeAsState(initial = "")
+    val isButtonEnabled: Boolean by signUpViewModel.isButtonEnabled.observeAsState(initial = false)
+
+    val isDropdownExpanded: Boolean by countryViewModel.isExpanded.observeAsState(initial = false)
+    val selectedCountry: CountryModel by countryViewModel.selectedCountry.observeAsState(initial = CountryModel(1, ""))
+    val countries: List<CountryModel> by countryViewModel.countries.observeAsState(initial = listOf<CountryModel>())
 
     Column(
         modifier = Modifier
@@ -39,39 +48,52 @@ fun SingUpForm(viewModel: SignUpViewModel){
             label = stringResource(R.string.full_name_label),
             marginTop = margin,
             value = fullName,
-            onValueChanged = { viewModel.onSignUpValuesChanged(it, documentID, email) }
+            onValueChanged = { signUpViewModel.onSignUpValuesChanged(it, documentID, email) }
         )
         TextFieldFor(
             label = stringResource(R.string.document_ID_label),
             marginTop = margin,
             value = documentID,
-            onValueChanged = { viewModel.onSignUpValuesChanged(fullName, it, email) },
+            onValueChanged = { signUpViewModel.onSignUpValuesChanged(fullName, it, email) },
             type = KeyboardType.Number
         )
         TextFieldFor(
             label = stringResource(R.string.email_label),
             marginTop = margin,
             value = email,
-            onValueChanged = { viewModel.onSignUpValuesChanged(fullName, documentID, it) },
+            onValueChanged = { signUpViewModel.onSignUpValuesChanged(fullName, documentID, it) },
             type = KeyboardType.Email
         )
         TextFieldFor(
             label = stringResource(R.string.company_label),
             marginTop = margin,
             value = company,
-            onValueChanged = { viewModel.onCompanyChanged(it) }
+            onValueChanged = { signUpViewModel.onCompanyChanged(it) }
         )
 
-        Dropdown(
-            label = stringResource(R.string.country_label),
-            marginTop = margin
-        )
+        if( countries.isEmpty() ){
+            Text(text = stringResource(R.string.loading_message),
+                 modifier = Modifier
+                    .padding(top =  margin,
+                        bottom = dimensionResource(R.dimen.dimen_4dp)))
+        }
+        else{
+            DropdownFor(
+                label = stringResource(R.string.country_label),
+                marginTop = margin,
+                selected = selectedCountry,
+                onSelectedChanged = { countryViewModel.onCountryChanged(it) },
+                isExpanded = isDropdownExpanded,
+                onExpandedChanged = { countryViewModel.onExpandedChanged(it) },
+                data = countries
+            )
+        }
 
         PrimaryButton(
             label = stringResource(R.string.save_label),
             marginTop = margin,
             enable = isButtonEnabled,
-            onSaveClick = { viewModel.onSignUp() }
+            onSaveClick = { signUpViewModel.onSignUp() }
         )
 
     }
@@ -79,51 +101,49 @@ fun SingUpForm(viewModel: SignUpViewModel){
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Dropdown(label: String, marginTop: Dp) {
-    val contextForToast = LocalContext.current.applicationContext
-    val listItems = arrayOf("Favorites", "Options", "Settings", "Share")
+fun DropdownFor(label: String, marginTop: Dp, data: List<CountryModel>,
+                selected: CountryModel, onSelectedChanged: (CountryModel) -> Unit,
+                isExpanded: Boolean, onExpandedChanged: (Boolean) -> Unit) {
+    //val contextForToast = LocalContext.current.applicationContext
+    //val listItems = arrayOf("Favorites", "Options", "Settings", "Share")
 
-    var selectedItem by remember {
-        mutableStateOf(listItems[0])
+    /*var selectedItem by remember {
+        mutableStateOf(data[0].nombre)
     }
     var expanded by remember {
         mutableStateOf(false)
-    }
+    }*/
 
     ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = {
-            expanded = !expanded
-        }
+        expanded = isExpanded,
+        onExpandedChange = { onExpandedChanged(!isExpanded) }
     ) {
         TextField(
-            value = selectedItem,
+            value = selected.name,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top =  marginTop),
+                .padding(top = marginTop),
             onValueChange = {},
             readOnly = true,
             label = { Text(text = label) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
+                    expanded = isExpanded
                 )
             },
             colors = ExposedDropdownMenuDefaults.textFieldColors()
         )
 
         ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
+            expanded = isExpanded,
+            onDismissRequest = { onExpandedChanged(false) }
         ) {
-            listItems.forEach { selectedOption ->
+            data.forEach { selectedOption ->
                 // menu item
                 DropdownMenuItem(onClick = {
-                    selectedItem = selectedOption
-                    //Toast.makeText(contextForToast, selectedOption, Toast.LENGTH_SHORT).show()
-                    expanded = false
+                    onSelectedChanged (selectedOption)
                 }) {
-                    Text(text = selectedOption)
+                    Text(text = selectedOption.name)
                 }
             }
         }
@@ -139,7 +159,7 @@ fun PrimaryButton(label: String, marginTop: Dp,
         modifier = Modifier
             .fillMaxWidth()
             .height(dimensionResource(R.dimen.button_height))
-            .padding(top =  marginTop),
+            .padding(top = marginTop),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Purple500,
             disabledBackgroundColor = Purple200,
