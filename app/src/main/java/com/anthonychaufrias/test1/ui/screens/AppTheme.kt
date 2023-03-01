@@ -1,4 +1,4 @@
-package com.anthonychaufrias.test1.ui.screens.signup
+package com.anthonychaufrias.test1.ui.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import com.anthonychaufrias.test1.ui.theme.Test1Theme
 
 @Composable
-fun SignUpTheme(content: @Composable () -> Unit){
+fun AppTheme(content: @Composable () -> Unit){
     Test1Theme {
         Surface(
             modifier = Modifier.fillMaxSize(),

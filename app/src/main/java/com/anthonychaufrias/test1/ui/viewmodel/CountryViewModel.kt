@@ -24,31 +24,24 @@ class CountryViewModel @Inject constructor(
     private val _isExpanded = MutableLiveData<Boolean>()
     val isExpanded: LiveData<Boolean> = _isExpanded
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = _isLoading
+
     init{
         loadCountryList()
     }
 
-    /*
-    https://www.usebraintrust.com/
-    https://github.com/Yayo-Arellano/JetpackComposeSimpleRestApi/blob/master/build.gradle
-    https://www.sogeti.es/soluciones/calidad-de-software/servicios-de-testing/testing/pruebas-de-aceptacion-de-usuario/
-    */
-
-
     fun loadCountryList(){
         viewModelScope.launch {
+            _isLoading.postValue(true)
             val list = repository.getCountryList()
-            /*val names = mutableListOf<String>()
-            list.forEach { country ->
-                names.add(country.name)
-            }*/
 
             if( list.isNotEmpty() ){
                 _selectedCountry.postValue(list[0])
             }
 
             _countries.postValue(list)
-            //_countryNames.postValue(names)
+            _isLoading.postValue(false)
         }
     }
 

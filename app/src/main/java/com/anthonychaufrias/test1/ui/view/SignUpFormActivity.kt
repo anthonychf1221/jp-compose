@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.anthonychaufrias.test1.ui.screens.signup.SignUpTheme
+import com.anthonychaufrias.test1.ui.screens.AppTheme
 import com.anthonychaufrias.test1.ui.screens.signup.SingUpForm
 import com.anthonychaufrias.test1.ui.theme.Test1Theme
 import com.anthonychaufrias.test1.ui.viewmodel.CountryViewModel
@@ -20,7 +20,7 @@ class SignUpFormActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Test1Theme {
-                SignUpTheme { SingUpForm(
+                AppTheme { SingUpForm(
                     signUpViewModel, countryViewModel
                 ) }
             }

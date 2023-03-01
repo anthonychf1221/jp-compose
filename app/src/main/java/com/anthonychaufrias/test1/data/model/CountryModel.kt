@@ -7,3 +7,5 @@ data class CountryModel (
     @Expose @SerializedName("idPais") val id: Int,
     @Expose @SerializedName("nombre") val name: String
 )
+
+

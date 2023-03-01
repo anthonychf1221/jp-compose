@@ -4,14 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,6 +31,7 @@ fun SingUpForm (
     val company: String by signUpViewModel.company.observeAsState(initial = "")
     val isButtonEnabled: Boolean by signUpViewModel.isButtonEnabled.observeAsState(initial = false)
 
+    val isCountryListLoading: Boolean by countryViewModel.isLoading.observeAsState(initial = true)
     val isDropdownExpanded: Boolean by countryViewModel.isExpanded.observeAsState(initial = false)
     val selectedCountry: CountryModel by countryViewModel.selectedCountry.observeAsState(initial = CountryModel(1, ""))
     val countries: List<CountryModel> by countryViewModel.countries.observeAsState(initial = listOf<CountryModel>())
@@ -71,7 +68,7 @@ fun SingUpForm (
             onValueChanged = { signUpViewModel.onCompanyChanged(it) }
         )
 
-        if( countries.isEmpty() ){
+        if( isCountryListLoading ){
             Text(text = stringResource(R.string.loading_message),
                  modifier = Modifier
                     .padding(top =  margin,
@@ -104,15 +101,6 @@ fun SingUpForm (
 fun DropdownFor(label: String, marginTop: Dp, data: List<CountryModel>,
                 selected: CountryModel, onSelectedChanged: (CountryModel) -> Unit,
                 isExpanded: Boolean, onExpandedChanged: (Boolean) -> Unit) {
-    //val contextForToast = LocalContext.current.applicationContext
-    //val listItems = arrayOf("Favorites", "Options", "Settings", "Share")
-
-    /*var selectedItem by remember {
-        mutableStateOf(data[0].nombre)
-    }
-    var expanded by remember {
-        mutableStateOf(false)
-    }*/
 
     ExposedDropdownMenuBox(
         expanded = isExpanded,
@@ -139,7 +127,6 @@ fun DropdownFor(label: String, marginTop: Dp, data: List<CountryModel>,
             onDismissRequest = { onExpandedChanged(false) }
         ) {
             data.forEach { selectedOption ->
-                // menu item
                 DropdownMenuItem(onClick = {
                     onSelectedChanged (selectedOption)
                 }) {
