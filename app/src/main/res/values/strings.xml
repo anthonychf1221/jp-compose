@@ -9,4 +9,13 @@
     <string name="loading_message">Loading…</string>
     <string name="save_label">Save</string>
 
+    <!-- messages -->
+    <string name="invalid_email">El email ingresado ya existe en la base de datos</string>
+    <string name="http_exception_message">Algo ha fallado. Lo sentimos</string>
+    <string name="io_exception_message">Por favor revise su conexión a internet</string>
+    <string name="general_exception_message">Algo ha fallado. Lo sentimos</string>
+
+    <string name="signup_successfully_message">Te has registrado correctamente</string>
+    <string name="general_success_message">Los datos se han guardado correctamente</string>
+
 </resources>

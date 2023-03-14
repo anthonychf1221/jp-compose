@@ -1,5 +1,6 @@
 package com.anthonychaufrias.test1.ui.screens.signup
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -8,27 +9,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.Dp
 import com.anthonychaufrias.test1.R
 import com.anthonychaufrias.test1.data.model.CountryModel
+import com.anthonychaufrias.test1.domain.model.SignUp
 import com.anthonychaufrias.test1.ui.theme.Purple200
 import com.anthonychaufrias.test1.ui.theme.Purple500
 import com.anthonychaufrias.test1.ui.viewmodel.CountryViewModel
 import com.anthonychaufrias.test1.ui.viewmodel.SignUpViewModel
+import com.anthonychaufrias.test1.util.UIText
+import com.anthonychaufrias.test1.util.asString
 
 @Composable
 fun SingUpForm (
      signUpViewModel: SignUpViewModel,
      countryViewModel: CountryViewModel
 ){
-    val margin = dimensionResource(R.dimen.body_margin)
-    val fullName: String by signUpViewModel.fullName.observeAsState(initial = "")
-    val documentID: String by signUpViewModel.documentID.observeAsState(initial = "")
-    val email: String by signUpViewModel.email.observeAsState(initial = "")
-    val company: String by signUpViewModel.company.observeAsState(initial = "")
+    val margin = dimensionResource(R.dimen.among_controls_margin)
+
+    val signUp: SignUp by signUpViewModel.signUpModel.observeAsState(
+        initial = SignUp.emptyObject()
+    )
+
+    val result: UIText? by signUpViewModel.result.observeAsState(initial = null)
     val isButtonEnabled: Boolean by signUpViewModel.isButtonEnabled.observeAsState(initial = false)
 
     val isCountryListLoading: Boolean by countryViewModel.isLoading.observeAsState(initial = true)
@@ -39,33 +47,52 @@ fun SingUpForm (
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = margin)){
+            .padding(dimensionResource(R.dimen.body_margin))){
 
-        TextFieldFor(
+        FormOutLinedTextField(
             label = stringResource(R.string.full_name_label),
-            marginTop = margin,
-            value = fullName,
-            onValueChanged = { signUpViewModel.onSignUpValuesChanged(it, documentID, email) }
+            modifier = Modifier.fillMaxWidth(),
+            value = signUp.fullName,
+            onValueChanged = { fullName ->
+                signUpViewModel.onSignUpValuesChanged(
+                    fullName, signUp.documentID, signUp.email,
+                    signUp.company, selectedCountry.id
+                )}
         )
-        TextFieldFor(
+        FormOutLinedTextField(
             label = stringResource(R.string.document_ID_label),
-            marginTop = margin,
-            value = documentID,
-            onValueChanged = { signUpViewModel.onSignUpValuesChanged(fullName, it, email) },
+            modifier = Modifier
+                .padding(top =  margin).fillMaxWidth(),
+            value = signUp.documentID,
+            onValueChanged = { documentID ->
+                signUpViewModel.onSignUpValuesChanged(
+                    signUp.fullName, documentID, signUp.email,
+                    signUp.company, selectedCountry.id
+                )},
             type = KeyboardType.Number
         )
-        TextFieldFor(
+        FormOutLinedTextField(
             label = stringResource(R.string.email_label),
-            marginTop = margin,
-            value = email,
-            onValueChanged = { signUpViewModel.onSignUpValuesChanged(fullName, documentID, it) },
+            modifier = Modifier
+                .padding(top =  margin).fillMaxWidth(),
+            value = signUp.email,
+            onValueChanged = { email ->
+                signUpViewModel.onSignUpValuesChanged(
+                    signUp.fullName, signUp.documentID, email,
+                    signUp.company, selectedCountry.id
+                )},
             type = KeyboardType.Email
         )
-        TextFieldFor(
+        FormOutLinedTextField(
             label = stringResource(R.string.company_label),
-            marginTop = margin,
-            value = company,
-            onValueChanged = { signUpViewModel.onCompanyChanged(it) }
+            modifier = Modifier
+                .padding(top =  margin).fillMaxWidth(),
+            value = signUp.company,
+            onValueChanged = { company ->
+                signUpViewModel.onSignUpValuesChanged(
+                    signUp.fullName, signUp.documentID,
+                    signUp.email, company, selectedCountry.id
+                )}
         )
 
         if( isCountryListLoading ){
@@ -75,11 +102,18 @@ fun SingUpForm (
                         bottom = dimensionResource(R.dimen.dimen_4dp)))
         }
         else{
-            DropdownFor(
+            FormDropdown(
                 label = stringResource(R.string.country_label),
-                marginTop = margin,
+                modifier = Modifier
+                    .fillMaxWidth().padding(top = margin),
                 selected = selectedCountry,
-                onSelectedChanged = { countryViewModel.onCountryChanged(it) },
+                onSelectedChanged = { country ->
+                    countryViewModel.onCountryChanged(country)
+                    signUpViewModel.onSignUpValuesChanged(
+                        signUp.fullName, signUp.documentID,
+                        signUp.email, signUp.company, country.id
+                    )
+                },
                 isExpanded = isDropdownExpanded,
                 onExpandedChanged = { countryViewModel.onExpandedChanged(it) },
                 data = countries
@@ -88,29 +122,57 @@ fun SingUpForm (
 
         PrimaryButton(
             label = stringResource(R.string.save_label),
-            marginTop = margin,
+            modifier = Modifier.fillMaxWidth()
+                .height(dimensionResource(R.dimen.button_height))
+                .padding(top = margin),
             enable = isButtonEnabled,
             onSaveClick = { signUpViewModel.onSignUp() }
         )
 
+        Result(result)
     }
+}
+
+@Composable
+fun Result(result: UIText?){
+    if(result == null){
+        return
+    }
+
+    val message = result.asString(LocalContext.current.applicationContext)
+    Message(message)
+
+    /*when(result){
+        is UIText.ErrorMessageCodeResource -> {
+            result.asString(LocalContext.current.applicationContext)
+        }
+        is UIText.SuccessMessageCodeResource -> {
+
+        }
+        else -> {}
+    }*/
+}
+
+@Composable
+fun Message(message: String){
+    val contextForToast = LocalContext.current.applicationContext
+    Toast.makeText(contextForToast, message, Toast.LENGTH_SHORT).show()
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DropdownFor(label: String, marginTop: Dp, data: List<CountryModel>,
-                selected: CountryModel, onSelectedChanged: (CountryModel) -> Unit,
-                isExpanded: Boolean, onExpandedChanged: (Boolean) -> Unit) {
+fun FormDropdown(label: String, data: List<CountryModel>, selected: CountryModel,
+                 isExpanded: Boolean, modifier: Modifier,
+                 onSelectedChanged: (CountryModel) -> Unit,
+                 onExpandedChanged: (Boolean) -> Unit) {
 
     ExposedDropdownMenuBox(
         expanded = isExpanded,
         onExpandedChange = { onExpandedChanged(!isExpanded) }
     ) {
-        TextField(
+        OutlinedTextField(
             value = selected.name,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = marginTop),
+            modifier = modifier,
             onValueChange = {},
             readOnly = true,
             label = { Text(text = label) },
@@ -119,7 +181,8 @@ fun DropdownFor(label: String, marginTop: Dp, data: List<CountryModel>,
                     expanded = isExpanded
                 )
             },
-            colors = ExposedDropdownMenuDefaults.textFieldColors()
+            // esto hara que se muestre el background de color gris
+            //colors = ExposedDropdownMenuDefaults.textFieldColors()
         )
 
         ExposedDropdownMenu(
@@ -139,14 +202,11 @@ fun DropdownFor(label: String, marginTop: Dp, data: List<CountryModel>,
 
 
 @Composable
-fun PrimaryButton(label: String, marginTop: Dp,
-                  enable: Boolean, onSaveClick: () -> Unit) {
+fun PrimaryButton(label: String, enable: Boolean,
+                  modifier: Modifier, onSaveClick: () -> Unit) {
     Button(
         onClick = { onSaveClick() },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(R.dimen.button_height))
-            .padding(top = marginTop),
+        modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Purple500,
             disabledBackgroundColor = Purple200,
@@ -160,26 +220,22 @@ fun PrimaryButton(label: String, marginTop: Dp,
 
 
 @Composable
-fun TextFieldFor(label: String, marginTop: Dp,
-                 value: String, onValueChanged: (String) -> Unit,
-                 type: KeyboardType = KeyboardType.Text){
-
-    //var value by rememberSaveable { mutableStateOf("") }
-    Text(
-        text = label,
-        modifier = Modifier
-            .padding(top =  marginTop,
-                     bottom = dimensionResource(R.dimen.dimen_4dp))
-    )
-    TextField(
+fun FormOutLinedTextField(label: String, value: String,
+                          modifier: Modifier, onValueChanged: (String) -> Unit,
+                          type: KeyboardType = KeyboardType.Text){
+    OutlinedTextField(
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.None,
+            autoCorrect = true,
+            keyboardType = type,
+            imeAction = ImeAction.Next
+        ),
         value = value,
         onValueChange = { onValueChanged(it) },
         maxLines = 1,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = type
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
+        label = { Text(label) },
+        modifier = modifier
     )
 }
+

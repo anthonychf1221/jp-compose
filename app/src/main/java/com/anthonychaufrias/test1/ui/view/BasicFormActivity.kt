@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.anthonychaufrias.test1.R
 import com.anthonychaufrias.test1.ui.theme.Test1Theme
 
 class BasicFormActivity : ComponentActivity() {
@@ -273,6 +275,36 @@ fun MyUI() {
         }
     }
 }
+
+
+
+@Composable
+fun FormTextField(label: String, value: String,
+                  marginTop: Dp, onValueChanged: (String) -> Unit,
+                  type: KeyboardType = KeyboardType.Text){
+
+    //var value by rememberSaveable { mutableStateOf("") }
+    Text(
+        text = label,
+        modifier = Modifier
+            .padding(top =  marginTop,
+                bottom = dimensionResource(R.dimen.dimen_4dp)
+            )
+    )
+    TextField(
+        value = value,
+        onValueChange = { onValueChanged(it) },
+        maxLines = 1,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = type
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+    )
+}
+
+
 
 
 // https://www.youtube.com/watch?v=x9bQW8V1WPA

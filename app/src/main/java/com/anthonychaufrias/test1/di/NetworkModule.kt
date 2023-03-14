@@ -1,6 +1,7 @@
 package com.anthonychaufrias.test1.di
 
 import com.anthonychaufrias.test1.data.network.CountryAPIClient
+import com.anthonychaufrias.test1.data.network.SignUpAPIClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,6 +27,12 @@ object NetworkModule {
     @Provides
     fun provideCountryAPI(retrofit: Retrofit): CountryAPIClient {
         return retrofit.create(CountryAPIClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideSignUpAPI(retrofit: Retrofit): SignUpAPIClient {
+        return retrofit.create(SignUpAPIClient::class.java)
     }
 
 }

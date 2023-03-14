@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anthonychaufrias.test1.data.CountryRepository
 import com.anthonychaufrias.test1.data.model.CountryModel
+import com.anthonychaufrias.test1.data.model.ListResponseModel
+import com.anthonychaufrias.test1.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -14,7 +16,7 @@ import javax.inject.Inject
 class CountryViewModel @Inject constructor(
     private val repository: CountryRepository
 ) : ViewModel(){
-
+    // state hoisting
     private val _countries = MutableLiveData<List<CountryModel>>()
     val countries: LiveData<List<CountryModel>> = _countries
 
@@ -31,16 +33,22 @@ class CountryViewModel @Inject constructor(
         loadCountryList()
     }
 
-    fun loadCountryList(){
+    private fun loadCountryList(){
         viewModelScope.launch {
             _isLoading.postValue(true)
-            val list = repository.getCountryList()
 
-            if( list.isNotEmpty() ){
-                _selectedCountry.postValue(list[0])
+            when(val resource = repository.getCountryList()){
+                is Resource.Success<*> -> {
+                    if( (resource.data as ListResponseModel).results.isNotEmpty() ){
+                        _selectedCountry.postValue(resource.data.results[0])
+                    }
+
+                    _countries.postValue(resource.data.results)
+                }
+                is Resource.Error<*> -> {
+
+                }
             }
-
-            _countries.postValue(list)
             _isLoading.postValue(false)
         }
     }
@@ -53,6 +61,5 @@ class CountryViewModel @Inject constructor(
     fun onExpandedChanged(expanded: Boolean){
         _isExpanded.value = expanded
     }
-
 
 }
